@@ -1,0 +1,23 @@
+{
+  "name": "expectacle",
+  "version": "1.0.0",
+  "description": "A simple, sanely-syntaxed expectation library.",
+  "main": "expectacle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com:keeto/expectacle.git"
+  },
+  "keywords": [
+    "expect",
+    "expectations",
+    "testing"
+  ],
+  "author": "Mark Obcena",
+  "license": "MIT-Style",
+  "bugs": {
+    "url": "https://github.com/keeto/expectacle/issues"
+  }
+}
