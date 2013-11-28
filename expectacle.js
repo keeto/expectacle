@@ -1,4 +1,4 @@
-(function(){
+(function(exports) {
 
   var slice = Array.prototype.slice;
   var toString = Object.prototype.toString;
@@ -665,6 +665,11 @@
    */
   expect.addMatchers = addMatchers;
 
-  module.exports = expect;
+  // Export
+  if (typeof module != 'undefined') {
+    module.exports = expect;
+  } else {
+    exports.expect = expect;
+  }
 
-})();
+})(typeof exports != 'undefined' ? exports : this);
