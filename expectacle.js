@@ -249,7 +249,7 @@
   }
 
   var notGetter = function() {
-    return this._not || (this._not = new ReversedExpectation(this._value));
+    return this._not || (this._not = new ReversedExpectation(this._expected));
   };
 
 
