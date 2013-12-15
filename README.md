@@ -13,7 +13,7 @@ Expectacle can be used in the browser, on NodeJS and on any CommonJS environment
 
 Download `expectacle.js` and include it with a script tag:
 
-```js
+```html
 <script type="text/javascript" src="/path/to/expectacle.js"></script>
 <script type="text/javascript">
 // window.expect();
