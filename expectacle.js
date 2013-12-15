@@ -562,6 +562,19 @@
     },
 
     /**
+     * Matches like toHaveMember, but only checks for members that are the
+     * value's own (i.e., not inherited).
+     */
+    toHaveOwnMember: function(name) {
+      var value = this._expected;
+      try {
+        return (value.hasOwnProperty(name) && name in value);
+      } catch(e) {
+        return false;
+      }
+    },
+
+    /**
      * Returns whether the original object value has a property with
      * the name passed.
      *
@@ -578,6 +591,20 @@
     },
 
     /**
+     * Matches like toHaveProperty, but only checks for properties that are the
+     * value's own (i.e., not inherited).
+     */
+    toHaveOwnProperty: function(name) {
+      var expected = this._expected;
+      try {
+        return expected.hasOwnProperty(name) && (name in expected) &&
+            (typeOf(expected[name]) != 'function');
+      } catch(e) {
+        return false;
+      }
+    },
+
+    /**
      * Returns whether the original object value has a method with
      * the name passed.
      */
@@ -585,6 +612,20 @@
       var expected = this._expected;
       try {
         return (name in expected) && (typeOf(expected[name]) == 'function');
+      } catch(e) {
+        return false;
+      }
+    },
+
+    /**
+     * Matches like toHaveMethod, but only checks for methods that are the
+     * value's own (i.e., not inherited).
+     */
+    toHaveOwnMethod: function(name) {
+      var expected = this._expected;
+      try {
+        return expected.hasOwnProperty(name) && (name in expected) &&
+            (typeOf(expected[name]) == 'function');
       } catch(e) {
         return false;
       }
