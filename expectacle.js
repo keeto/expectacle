@@ -71,7 +71,7 @@
    */
   function instanceOf(item, type) {
     var itemType = typeOf(item);
-    if (itemType == 'string' || itemType == 'number' || itemType == 'Boolean') {
+    if (itemType == 'string' || itemType == 'number' || itemType == 'boolean') {
       item = Object(item);
     }
     return item instanceof type;
