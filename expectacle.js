@@ -372,6 +372,11 @@
      *     check against.
      */
     toBeAnInstanceOf: function(constructor) {
+      if (typeOf(constructor) != 'function') {
+        throw new ExpectationError({
+          message: 'toBeAnInstanceOf matcher requires a constructor function.'
+        });
+      }
       return instanceOf(this._expected, constructor);
     },
 
