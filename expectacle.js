@@ -227,15 +227,6 @@
   }
 
   /**
-   * Truncates a string.
-   *
-   * @private
-   */
-  function truncate(s, n) {
-    return (typeof s != 'string') ? s : s.length < n ? s : s.slice(0, n);
-  }
-
-  /**
    * Returns the string representation of the error.
    */
   ExpectationError.prototype.toString = function() {
@@ -244,10 +235,10 @@
     } else {
       return [
         this.name + ': Expected',
-        truncate(JSON.stringify(this.expected, replacer), 128),
+        JSON.stringify(this.expected, replacer),
         this.operator,
         (this.received != NULL_VALUE) ?
-            truncate(JSON.stringify(this.received, replacer), 128) :
+            JSON.stringify(this.received, replacer) :
             ''
       ].join(' ');
     }
