@@ -202,5 +202,4 @@ Checks whether the expected value is falsy (i.e., coerces as a boolean `false` v
 About
 -----
 
-Copyright 2013, Mark "Keeto" Obcena
-Released under an MIT-Style License.
+Copyright 2014, Mark "Keeto" Obcena. Released under an MIT-Style License.
