@@ -183,6 +183,57 @@ describe('Expectacle', function() {
 
     });
 
+    describe('toBeBoolean', function() {
+
+      it('should fail if the value is an array.', function(done) {
+        try {
+          expect([]).toBeBoolean();
+          done(new Error('toBeBoolean passed on array.'));
+        } catch(e) {
+          done();
+        }
+      });
+
+      it('should be aliased as toBeABoolean', function () {
+        expect(Boolean()).toBeABoolean();
+      });
+
+    });
+
+    describe('toBeFunction', function() {
+
+      it('should fail if the value is an array.', function(done) {
+        try {
+          expect([]).toBeFunction();
+          done(new Error('toBeFunction passed on array.'));
+        } catch(e) {
+          done();
+        }
+      });
+
+      it('should be aliased as toBeAFunction', function () {
+        expect(function () {}).toBeAFunction();
+      });
+
+    });
+
+    describe('toBeArray', function() {
+
+      it('should fail if the value is an object.', function(done) {
+        try {
+          expect({}).toBeArray();
+          done(new Error('toBeArray passed on object.'));
+        } catch(e) {
+          done();
+        }
+      });
+
+      it('should be aliased as toBeAnArray', function () {
+        expect([]).toBeAnArray();
+      });
+
+    });
+
     describe('toBeObject', function() {
 
       it('should fail if the value is an array.', function(done) {
@@ -192,6 +243,45 @@ describe('Expectacle', function() {
         } catch(e) {
           done();
         }
+      });
+
+      it('should be aliased as toBeAnObject', function () {
+        expect({}).toBeAnObject();
+      });
+
+    });
+
+
+    describe('toBeNumber', function() {
+
+      it('should fail if the value is an array.', function(done) {
+        try {
+          expect([]).toBeNumber();
+          done(new Error('toBeNumber passed on array.'));
+        } catch(e) {
+          done();
+        }
+      });
+
+      it('should be aliased as toBeANumber', function () {
+        expect(Number()).toBeANumber();
+      });
+
+    });
+
+    describe('toBeString', function() {
+
+      it('should fail if the value is an array.', function(done) {
+        try {
+          expect([]).toBeString();
+          done(new Error('toBeString passed on array.'));
+        } catch(e) {
+          done();
+        }
+      });
+
+      it('should be aliased as toBeAString', function () {
+        expect('').toBeAString();
       });
 
     });
