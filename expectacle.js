@@ -816,6 +816,16 @@
   });
 
   /**
+   * Aliases so method names really match proper English articles.
+   */
+   Expectation.prototype.toBeABoolean = Expectation.prototype.toBeBoolean;
+   Expectation.prototype.toBeAFunction = Expectation.prototype.toBeFunction;
+   Expectation.prototype.toBeAnArray = Expectation.prototype.toBeArray;
+   Expectation.prototype.toBeAnObject = Expectation.prototype.toBeObject;
+   Expectation.prototype.toBeANumber = Expectation.prototype.toBeNumber;
+   Expectation.prototype.toBeAString = Expectation.prototype.toBeString;
+
+  /**
    * The main expectation function.
    */
   function expect(value) {
