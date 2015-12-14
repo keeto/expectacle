@@ -146,27 +146,27 @@ Checks whether the expectation's value has the type corresponding to the passed 
 
 This function is implemented using `Object.prototype.toString` to get the type's string representation. The following typeStrings are pre-populated: `'arguments'`, `'array'`, `'boolean'`, `'date'`, `'function'`,`'null'`, `'number'`, `'object'`, `'regexp'`, `'string'`, `'undefined'`.
 
-#### `toBeBoolean()`
+#### `toBeBoolean()` / `toBeABoolean()`
 
 Checks whether the expected value is a boolean.
 
-#### `toBeArray()`
+#### `toBeArray()` / `toBeAnArray()`
 
 Checks whether the expected value is an array.
 
-#### `toBeFunction()`
+#### `toBeFunction()` / `toBeAFunction()`
 
 Checks whether the expected value is a function.
 
-#### `toBeNumber()`
+#### `toBeNumber()` / `toBeANumber()`
 
 Checks whether the expected value is a number.
 
-#### `toBeObject()`
+#### `toBeObject()` / `toBeAnObject()`
 
 Checks whether the expected value is an object (but not an array).
 
-#### `toBeString()`
+#### `toBeString()` / `toBeAString()`
 
 Checks whether the expected value is a string.
 
@@ -238,4 +238,4 @@ The function `expect.fail` can be used to raise an ExpectationError. It takes on
 About
 -----
 
-Copyright 2014, Mark "Keeto" Obcena. Released under an MIT-Style License.
+Copyright 2015, Mark "Keeto" Obcena. Released under an MIT-Style License.
