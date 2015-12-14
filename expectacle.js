@@ -362,6 +362,23 @@
   }
 
   /**
+   * Creates an alias to a matcher.
+   *
+   * @param {string} name The name of the matcher to alias.
+   * @param {string} alias The new name for the matcher.
+   */
+  function aliasMatcher(name, alias) {
+    if (!Expectation.prototype[name]) {
+      return;
+    }
+    var caller = function() {
+      return this[name].apply(this, arguments);
+    };
+    Expectation.prototype[alias] = caller;
+    ReversedExpectation.prototype[alias] = caller;
+  }
+
+  /**
    * Adds multiple matchers
    *
    * @param {Object.<string, module:expectacle.MatcherFunction} matchers The
@@ -818,12 +835,12 @@
   /**
    * Aliases so method names really match proper English articles.
    */
-   Expectation.prototype.toBeABoolean = Expectation.prototype.toBeBoolean;
-   Expectation.prototype.toBeAFunction = Expectation.prototype.toBeFunction;
-   Expectation.prototype.toBeAnArray = Expectation.prototype.toBeArray;
-   Expectation.prototype.toBeAnObject = Expectation.prototype.toBeObject;
-   Expectation.prototype.toBeANumber = Expectation.prototype.toBeNumber;
-   Expectation.prototype.toBeAString = Expectation.prototype.toBeString;
+  aliasMatcher('toBeBoolean', 'toBeABoolean');
+  aliasMatcher('toBeFunction', 'toBeAFunction');
+  aliasMatcher('toBeArray', 'toBeAnArray');
+  aliasMatcher('toBeObject', 'toBeAnObject');
+  aliasMatcher('toBeNumber', 'toBeANumber');
+  aliasMatcher('toBeString', 'toBeAString');
 
   /**
    * The main expectation function.

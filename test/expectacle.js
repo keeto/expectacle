@@ -196,6 +196,7 @@ describe('Expectacle', function() {
 
       it('should be aliased as toBeABoolean', function () {
         expect(Boolean()).toBeABoolean();
+        expect(null).not.toBeABoolean();
       });
 
     });
@@ -213,6 +214,7 @@ describe('Expectacle', function() {
 
       it('should be aliased as toBeAFunction', function () {
         expect(function () {}).toBeAFunction();
+        expect(1).not.toBeAFunction();
       });
 
     });
@@ -230,6 +232,7 @@ describe('Expectacle', function() {
 
       it('should be aliased as toBeAnArray', function () {
         expect([]).toBeAnArray();
+        expect(0).not.toBeAnArray();
       });
 
     });
@@ -247,6 +250,7 @@ describe('Expectacle', function() {
 
       it('should be aliased as toBeAnObject', function () {
         expect({}).toBeAnObject();
+        expect(null).not.toBeAnObject();
       });
 
     });
@@ -265,6 +269,7 @@ describe('Expectacle', function() {
 
       it('should be aliased as toBeANumber', function () {
         expect(Number()).toBeANumber();
+        expect(String()).not.toBeANumber();
       });
 
     });
@@ -282,6 +287,7 @@ describe('Expectacle', function() {
 
       it('should be aliased as toBeAString', function () {
         expect('').toBeAString();
+        expect(1).not.toBeAString();
       });
 
     });
