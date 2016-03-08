@@ -72,6 +72,36 @@
   var typeMatcher = /\[object\s(.*)\]/;
 
   /**
+   * Used to create a custom type matchers that only verifies the type of some
+   * deep property in an object, when using expect(obj).toBeLike({...}).
+   *
+   * @param {string} [type] The expected type of the value (empty for any type)
+   */
+  function TypeMatcher(type) {
+    this._type = type;
+  }
+
+  /**
+   * Called when testing if the actual value meets the expectation for this
+   * matcher.
+   *
+   * @return {boolean} True if the expectation is met, otherwise false.
+   */
+  TypeMatcher.prototype.matchExpected = function(actual) {
+    return !this._type || typeOf(actual) === this._type;
+  };
+
+  /**
+   * Used to get the human-readable version of the expected value in the error
+   * message when the match fails.
+   *
+   * @return {string}
+   */
+  TypeMatcher.prototype.toString = function() {
+    return 'type = ' + (this._type || 'any');
+  };
+
+  /**
    * Returns the type of an item as a string.
    *
    * @param {*} item The item to test.
@@ -182,6 +212,8 @@
   function deepEqual(actual, expected) {
     if (actual === expected) {
       return true;
+    } else if (expected && typeof expected.matchExpected === 'function') {
+      return expected.matchExpected(actual);
     } else if (actual instanceof Date && expected instanceof Date) {
       return actual.getTime() === expected.getTime();
     } else if (actual instanceof RegExp && expected instanceof RegExp) {
@@ -236,6 +268,8 @@
       return value.toString();
     } else if (typeof value === 'function' || value instanceof RegExp) {
       return value.toString();
+    } else if (value && typeof value.matchExpected === 'function') {
+      return '[match: ' + value.toString() + ']';
     }
     return value;
   }
@@ -874,6 +908,42 @@
       message: opt_message || 'Force failed.',
       stackFn: expect.fail
     });
+  };
+
+  function createTypeMatcher(type) {
+    return function() {
+      return new TypeMatcher(type);
+    }
+  }
+
+  /**
+   * Wildcard type matchers, useful when checking a deep object
+   * where we want to validate only the types of properties but
+   * not necessarily their values.
+   *
+   * E.g. expect(obj).toBeLike({x: true, y: false, z: expect.type.string()});
+   *
+   * @type {Object}
+   * @property {object} any Matches anything that is not undefined
+   * @property {object} string Matches any string
+   * @property {object} number Matches any number
+   * @property {object} bool Matches any boolean
+   * @property {object} func Matches any function
+   * @property {object} obj Matches any object
+   * @property {object} arr Matches any array
+   * @property {object} date Matches any date
+   * @property {object} regexp Matches any regular expression
+   */
+  expect.type = {
+    any: createTypeMatcher(),
+    string: createTypeMatcher('string'),
+    number: createTypeMatcher('number'),
+    bool: createTypeMatcher('boolean'),
+    func: createTypeMatcher('function'),
+    obj: createTypeMatcher('object'),
+    arr: createTypeMatcher('array'),
+    date: createTypeMatcher('date'),
+    regexp: createTypeMatcher('regexp'),
   };
 
   /**
