@@ -924,15 +924,15 @@
    * E.g. expect(obj).toBeLike({x: true, y: false, z: expect.type.string()});
    *
    * @type {Object}
-   * @property {object} any Matches anything that is not undefined
-   * @property {object} string Matches any string
-   * @property {object} number Matches any number
-   * @property {object} bool Matches any boolean
-   * @property {object} func Matches any function
-   * @property {object} obj Matches any object
-   * @property {object} arr Matches any array
-   * @property {object} date Matches any date
-   * @property {object} regexp Matches any regular expression
+   * @property {function} any Matches anything that is not undefined
+   * @property {function} string Matches any string
+   * @property {function} number Matches any number
+   * @property {function} bool Matches any boolean
+   * @property {function} func Matches any function
+   * @property {function} obj Matches any object
+   * @property {function} arr Matches any array
+   * @property {function} date Matches any date
+   * @property {function} regexp Matches any regular expression
    */
   expect.type = {
     any: createTypeMatcher(),
