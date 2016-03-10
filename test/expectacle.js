@@ -545,4 +545,16 @@ describe('Expectacle', function() {
 
   });
 
+  describe('expect.promised', function() {
+
+    it('should check a promised value', function() {
+      return expect.promised(Promise.resolve(false)).toBeFalse();
+    });
+
+    it('should cache throwed items', function() {
+      return expect.promised(Promise.reject(false)).toBeFalse();
+    });
+
+  });
+
 });

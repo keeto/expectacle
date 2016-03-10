@@ -443,6 +443,13 @@
     }
   };
 
+  var hasDefineProperty = false;
+  try {
+    Object.defineProperty({}, 'test', {value: 1});
+    hasDefineProperty = true;
+  } catch(e) {
+  }
+
   /**
    * Represents an expectation.
    *
@@ -454,13 +461,6 @@
     if (this._declareNot) {
       this.not = new ReversedExpectation(value);
     }
-  }
-
-  var hasDefineProperty = false;
-  try {
-    Object.defineProperty({}, 'test', {value: 1});
-    hasDefineProperty = true;
-  } catch(e) {
   }
 
   var notGetter = function() {
@@ -489,6 +489,38 @@
    */
   function ReversedExpectation(value) {
     this._expected = value;
+  }
+
+  function PromisedExpectation(value) {
+    if (!value || typeOf(value.then) != 'function') {
+      throw new TypeError('Expected a promise.');
+    }
+    if (this._declareNot) {
+      this.not = new ReversedPromisedExpectation(value);
+    }
+    this._promise = value;
+  }
+
+  var promisedNotGetter = function() {
+    return this._not ||
+      (this._not = new ReversedPromisedExpectation(this._promise));
+  };
+
+
+  // For environments that support getters, we define getters for the 'not'
+  // property.
+  if (hasDefineProperty) {
+    Object.defineProperty(PromisedExpectation.prototype, 'not', {
+      get: promisedNotGetter
+    });
+  } else if (typeof Expectation.prototype.__defineGetter__ == 'function') {
+    PromisedExpectation.prototype.__defineGetter__('not', promisedNotGetter);
+  } else {
+    PromisedExpectation.prototype._declareNot = true;
+  }
+
+  function ReversedPromisedExpectation(value) {
+    this._promise = value;
   }
 
   /**
@@ -521,13 +553,46 @@
         received = value;
       }
     };
-    if ((!!matcher.call(context, this._expected, value)) != asNot) return;
+    if ((!!matcher.call(context, this._expected, value)) != asNot) {
+      return;
+    }
     throw new ExpectationError({
       operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
       expected: this._expected,
       received: received,
       stackFn: this[name]
     });
+  }
+
+  /**
+   * Applies a promised matcher to a set of arguments.
+   *
+   * @param {string} name The name of the matcher.
+   * @param {module:expectacle.MatcherFunction} matcher The matcher function.
+   * @param {boolean} asNot If set to true, the matcher will be applied as a
+   *     "not matcher."
+   * @param {*} value The received value.
+   * @private
+   */
+  function applyPromisedMatcher(name, matcher, asNot, value) {
+    var received = arguments.length == 4 ? value : NULL_VALUE;
+    var context = {
+      setReceived: function(value) {
+        received = value;
+      }
+    };
+    var caller = function(expected) {
+      if ((!!matcher.call(context, expected, value)) != asNot) {
+        return;
+      }
+      throw new ExpectationError({
+        operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
+        expected: expected,
+        received: received,
+        stackFn: this[name]
+      });
+    };
+    return this._promise.then(caller, caller);
   }
 
   /**
@@ -542,6 +607,10 @@
       partial(applyMatcher, name, matcher, false);
     ReversedExpectation.prototype[name] =
       partial(applyMatcher, name, matcher, true);
+    PromisedExpectation.prototype[name] =
+      partial(applyPromisedMatcher, name, matcher, false);
+    ReversedPromisedExpectation.prototype[name] =
+      partial(applyPromisedMatcher, name, matcher, true);
   }
 
   /**
@@ -1039,6 +1108,10 @@
   function expect(value) {
     return new Expectation(value);
   }
+
+  expect.promised = function(value) {
+    return new PromisedExpectation(value);
+  };
 
   /**
    * A representation of a null value used as a placeholder for user input.

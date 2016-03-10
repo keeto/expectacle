@@ -21,6 +21,6 @@
     "url": "https://github.com/keeto/expectacle/issues"
   },
   "devDependencies": {
-    "mocha": "~1.15.1"
+    "mocha": "^2.4.5"
   }
 }
