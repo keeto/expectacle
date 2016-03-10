@@ -124,6 +124,102 @@ describe('Expectacle', function() {
 
     });
 
+    describe('toBeLike', function() {
+      it('should fail if the two objects are not like each other', function(done) {
+        try {
+          expect({x: true}).toBeLike({x: false});
+          done(new Error('similar objects should match'));
+        } catch(e) {
+          done();
+        }
+      });
+      it('should fail if the two objects are not strictly like each other', function(done) {
+        try {
+          expect({x: true, y: '', z: {a: 1, b: 2}}).toBeLike({x: 1, y: 0, z: {a: true, b: 2}});
+          done(new Error('expect.toBeLike should have failed'));
+        } catch(e) {
+          done();
+        }
+      });
+      it('should pass if the two objects are like each other', function(done) {
+        try {
+          expect({x: true, y: [1, 2], z: {a: '', b: 2}}).toBeLike({x: true, y: [1, 2], z: {a: '', b: 2}});
+          done();
+        } catch(e) {
+          done(new Error(e));
+        }
+      });
+      it('should fail if the expect.type matchers are not matched', function(done) {
+        try {
+          expect({}).toBeLike({x: expect.type.any});
+          done(new Error('expect.type.any should not match undefined'));
+        } catch(e) {
+          done();
+        }
+      });
+      it('should consider an object to match if the expect.type placeholders are satisfied', function(done) {
+        var type = expect.type;
+        try {
+          expect({
+            deep: {
+              a: [],
+              b: true,
+              c: {},
+              d: new Date(),
+              r: /pattern/g,
+              x: 123,
+              y: 'hello',
+              z: function() {}
+            },
+            a: '',
+            b: 123,
+            c: []
+          }).toBeLike({
+            deep: {
+              a: type.arr(),
+              b: type.bool(),
+              c: type.obj(),
+              d: type.date(),
+              r: type.regexp(),
+              x: type.number(),
+              y: type.string(),
+              z: type.func()
+            },
+            a: type.string(),
+            b: type.number(),
+            c: type.arr()
+          });
+          done();
+        } catch(e) {
+          done(new Error(e));
+        }
+      });
+      it('should fail if expect.type.any is used for an undefined property', function(done) {
+        try {
+          expect({}).toBeLike({a: expect.type.any()});
+          done(new Error('undefined should not match expect.type.any'));
+        } catch(e) {
+          done();
+        }
+      });
+      it('should fail if expect.type.bool is used for a number', function(done) {
+        try {
+          expect({a: 1}).toBeLike({a: expect.type.bool()});
+          done(new Error('a number should not match expect.type.bool'));
+        } catch(e) {
+          done();
+        }
+      });
+      it('should fail if expect.type.obj is used for an array', function(done) {
+        try {
+          expect({a: []}).toBeLike({a: expect.type.obj()});
+          done(new Error('an array should not match expect.type.obj'));
+        } catch(e) {
+          done();
+        }
+      });
+    });
+
     describe('toBeAnInstanceOf', function() {
 
       it('should throw an error if called without a function argument.', function(done) {
