@@ -433,6 +433,116 @@ describe('Expectacle', function() {
 
     });
 
+    describe('toHaveShape', function() {
+
+      it('should known basic shapes', function(done) {
+        try {
+          expect(function(){ return arguments; }()).toHaveShape(expect.shape.Arguments());
+          expect([]).toHaveShape(expect.shape.Array());
+          expect(true).toHaveShape(expect.shape.Boolean());
+          expect(new Date()).toHaveShape(expect.shape.Date());
+          expect(function(){}).toHaveShape(expect.shape.Function());
+          expect(null).toHaveShape(expect.shape.Null());
+          expect(1).toHaveShape(expect.shape.Number());
+          expect({}).toHaveShape(expect.shape.Object());
+          expect((/m/g)).toHaveShape(expect.shape.RegExp());
+          expect('string').toHaveShape(expect.shape.String());
+          expect(undefined).toHaveShape(expect.shape.Undefined());
+          expect({
+            hello: 'world',
+            someValue: 1,
+            somethingElse: {
+              world: {
+                what: true,
+              }
+            },
+            message: {}
+          }).toHaveShape({
+            hello: expect.shape.String(),
+            someValue: expect.shape.Number(),
+            somethingElse: {
+              world: {
+                what: expect.shape.Boolean()
+              }
+            },
+            message: expect.shape.Object()
+          });
+          done();
+        } catch(e) {
+          done(e);
+        }
+      });
+
+      it('should be able to compare array shapes with a single type', function(done) {
+        try {
+          expect([1, 2, 3]).toHaveShape(expect.shape.Array(expect.shape.Number()));
+          expect([1, 'string', 3]).not.toHaveShape(expect.shape.Array(expect.shape.Number()));
+          done();
+        } catch(e) {
+          done(e);
+        }
+      });
+
+      it('should be able to compare ArrayStructure types.', function(done) {
+        try {
+          expect([1, 'string']).toHaveShape(expect.shape.ArrayStructure([
+            expect.shape.Number(),
+            expect.shape.String()
+          ]));
+          expect([1, 1]).not.toHaveShape(expect.shape.ArrayStructure([
+            expect.shape.Number(),
+            expect.shape.String()
+          ]));
+          expect([{str: 'hello'}]).toHaveShape(expect.shape.ArrayStructure([{
+            str: expect.shape.String()
+          }]));
+          done();
+        } catch(e) {
+          done(e);
+        }
+      });
+
+      it('should be able to compare Object shape.', function(done) {
+        try {
+          expect({
+            str: 'string',
+            num: 1,
+            bool: true
+          }).toHaveShape(expect.shape.Object({
+            str: expect.shape.String(),
+            num: expect.shape.Number(),
+            bool: expect.shape.Boolean()
+          }));
+          expect({
+            nested: {
+              str: 'string',
+              num: 1,
+              bool: true
+            }
+          }).toHaveShape(expect.shape.Object({
+            nested: {
+              str: expect.shape.String(),
+              num: expect.shape.Number(),
+              bool: expect.shape.Boolean()
+            }
+          }));
+          expect({
+            array: [1, 2, 'string']
+          }).toHaveShape(expect.shape.Object({
+            array: [
+              expect.shape.Number(),
+              expect.shape.Number(),
+              expect.shape.String()
+            ]
+          }));
+          done();
+        } catch(e) {
+          done(e);
+        }
+      });
+
+    });
+
   });
 
 });

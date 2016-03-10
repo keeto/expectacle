@@ -190,11 +190,192 @@
              actual.multiline === expected.multiline &&
              actual.lastIndex === expected.lastIndex &&
              actual.ignoreCase === expected.ignoreCase;
-    } else if (typeof actual != 'object' && typeof expected != 'object') {
-      return actual == expected;
+    } else if (typeof actual !== 'object' && typeof expected !== 'object') {
+      return actual === expected;
     } else {
       return objEquiv(actual, expected);
     }
+  }
+
+  function Shape(name, checker) {
+    this.name = name;
+    this.checker = checker;
+  }
+
+  Shape.isShape = function(shape) {
+    return shape instanceof Shape;
+  };
+
+  var InternalShapes = {};
+
+  function addTypeShape(name) {
+    var type = name.toLowerCase();
+    InternalShapes[name] = function() {
+      return new Shape(name, function(value) {
+        return typeOf(value) == type;
+      });
+    };
+  }
+
+  InternalShapes.Array = function(subType) {
+    switch (typeOf(subType)) {
+      case 'object':
+        if (!Shape.isShape(subType)) {
+          subType = InternalShapes.Object(subType);
+        }
+        break;
+      case 'array':
+        subType = InternalShapes.ArrayStructure(subType);
+        break;
+      case 'undefined':
+        break;
+      default:
+        subType = InternalShapes.Literal(subType);
+        break;
+    }
+    var checker = function(object) {
+      if (typeOf(object) != 'array') {
+        return false;
+      }
+      if (subType) {
+        for (var i = 0, l = object.length; i < l; i++) {
+          if (compareShape(subType, object[i])) {
+            continue;
+          }
+          return false;
+        }
+      }
+      return true;
+    };
+    var name = 'Array';
+    if (subType) {
+      name += '.<' + subType.name + '>';
+    }
+    return new Shape(name, checker);
+  };
+
+  InternalShapes.ArrayStructure = function(types) {
+    if (typeOf(types) != 'array') {
+      throw new Error('Array Literal expects an array parameter.');
+    }
+    if (!types.length) {
+      throw new Error('Empty types parameter');
+    }
+    var subTypes = [];
+    for (var i = 0, l = types.length; i < l; i++) {
+      var type = types[i];
+      switch (typeOf(type)) {
+        case 'object':
+          if (!Shape.isShape(type)) {
+            type = InternalShapes.Object(type);
+            types[i] = type;
+          }
+          break;
+        case 'array':
+          type = InternalShapes.ArrayStructure(type);
+          types[i] = type;
+          break;
+        default:
+          shape = InternalShapes.Literal(shape);
+          break;
+      }
+      subTypes.push(type.name);
+    }
+    var name = 'Array.[' + subTypes.join(', ') + ']';
+    var checker = function(object) {
+      if (typeOf(object) != 'array') {
+        return false;
+      }
+      for (var i = 0, l = types.length; i < l; i++) {
+        if (!compareShape(types[i], object[i])) {
+          return false;
+        }
+      }
+      return true;
+    };
+    return new Shape(name, checker);
+  };
+
+  InternalShapes.Object = function(descriptor) {
+    descriptor = descriptor || {};
+    var shapes = [];
+    var subInternalShapes = [];
+    for (var key in descriptor) {
+      var shape = descriptor[key];
+      switch (typeOf(shape)) {
+        case 'object':
+          if (!Shape.isShape(shape)) {
+            shape = InternalShapes.Object(shape);
+          }
+          break;
+        case 'array':
+          shape = InternalShapes.ArrayStructure(shape);
+          break;
+        default:
+          shape = InternalShapes.Literal(shape);
+          break;
+      }
+      subInternalShapes.push(key + ':' + shape.name);
+      shapes.push({key: key, checker: shape});
+    }
+    var name = 'Object.{' + subInternalShapes.join(', ') + '}';
+    var checker = function(object) {
+      if (typeOf(object) != 'object') {
+        return false;
+      }
+      for (var i = 0, l = shapes.length; i < l; i++) {
+        var shape = shapes[i];
+        if (!compareShape(shape.checker, object[shape.key])) {
+          return false;
+        }
+      }
+      return true;
+    };
+    return new Shape(name, checker);
+  };
+
+  InternalShapes.Literal = function(value) {
+    var name = 'Literal.<' + JSON.stringify(value, replacer) + '>';
+    var checker = function(object) {
+      return value === object;
+    };
+    return new Shape(name, checker);
+  };
+
+  var knownInternalShapes = [
+    'Arguments',
+    'Boolean',
+    'Date',
+    'Function',
+    'Null',
+    'Number',
+    'RegExp',
+    'String',
+    'Undefined'
+  ];
+
+  for (var i = 0, l = knownInternalShapes.length; i < l; i++) {
+    addTypeShape(knownInternalShapes[i]);
+  }
+
+  function compareShape(shape, object) {
+    if (!shape) {
+      return false;
+    }
+    if (Shape.isShape(shape)) {
+      return shape.checker(object);
+    }
+    switch (typeOf(shape)) {
+      case 'object':
+        return compareShape(InternalShapes.Object(shape), object);
+        break;
+      case 'array':
+        return compareShape(InternalShapes.ArrayStructure(shape), object);
+        break;
+      default:
+        return false;
+    }
+    return true;
   }
 
   /**
@@ -236,6 +417,8 @@
       return value.toString();
     } else if (typeof value === 'function' || value instanceof RegExp) {
       return value.toString();
+    } else if (value instanceof Shape) {
+      return value.name;
     }
     return value;
   }
@@ -764,6 +947,14 @@
       return deepEqual(expected, value);
     },
 
+    toHaveShape: function(expected, shape) {
+      if (!compareShape(shape, expected)) {
+        this.setReceived(JSON.parse(JSON.stringify(shape, replacer)));
+        return false;
+      }
+      return true;
+    },
+
     /**
      * Returns whether the expected function value has thrown.
      *
@@ -883,6 +1074,8 @@
    * @param {module:expectacle.MatcherFunction} matcher The matcher function.
    */
   expect.addMatcher = addMatcher;
+
+  expect.shape = InternalShapes;
 
   /**
    * Adds multiple matchers
