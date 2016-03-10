@@ -198,6 +198,101 @@ Checks whether the expected value is truthy (i.e., coerces as a boolean `true` v
 
 Checks whether the expected value is falsy (i.e., coerces as a boolean `false` value).
 
+#### `toHaveShape(shape)`
+
+Checks whether the expected object has a particular shape. See the "Shapes" section below.
+
+### Shapes
+
+Shapes are a way to verify the structure of the expected value in your tests, without verifying the actual value.
+
+You can use the `toHaveShape()` method, passing it a shape:
+
+```js
+expect({
+  str: 'something',
+  num: 1,
+  bool: true
+}).toHaveShape({
+  str: expect.shape.String(),
+  num: expect.shape.Number(),
+  bool: expect.shape.Boolean()
+});
+```
+
+Shapes are not just limited to objects. You can check the shape of an array as well:
+
+```js
+// Check that all array members are of a particular type:
+expect([1, 2, 3]).toHaveShape(expect.shape.Array(expect.shape.Number()));
+
+// Check that array members match particular shapes:
+expect([1, 'string', {key: 'name'}]).toHaveShape(expect.shape.LiteralArray([
+  expect.shape.Number(),
+  expect.shape.String(),
+  {key: expect.shape.String()}
+]));
+```
+
+All built-in shapes are available via `expect.shape`.
+
+#### `expect.shape.Arguments()`
+
+Checks the expected value is of type `"arguments"`.
+
+#### `expect.shape.Array(shape)`
+
+When provided with a `shape`, checks whether the expected value is an array, each element of which has the provided `shape`.
+
+If no `shape` is provided, it only checks that the expected value is an array.
+
+#### `expect.shape.Boolean()`
+
+Checks the expected value is of type `"boolean"`.
+
+#### `expect.shape.Date()`
+
+Checks the expected value is of type `"date"`.
+
+#### `expect.shape.Function()`
+
+Checks the expected value is of type `"function"`.
+
+#### `expect.shape.Literal(value)`
+
+Checks that the expected value is equal (`===`) to the given `value`.
+
+#### `expect.shape.LiteralArray(shapesArray)`
+
+Checks that each item in the expected array value corresponds to the shape in the same index in the provided `shapesArray`.
+
+#### `expect.shape.Null()`
+
+Checks the expected value is of type `"null"`.
+
+#### `expect.shape.Number()`
+
+Checks the expected value is of type `"number"`.
+
+#### `expect.shape.Object(shapeDescriptor)`
+
+If an object `shapeDescriptor` is provided, checks if the expected object value's properties are of the shape of the corresponding `shapeDescriptor`.
+
+If no `shapeDescriptor` is provided, it simply checks if the expected value is an object.
+
+#### `expect.shape.RegExp()`
+
+Checks the expected value is of type `"regexp"`.
+
+#### `expect.shape.String()`
+
+Checks the expected value is of type `"string"`.
+
+#### `expect.shape.Undefined()`
+
+Checks the expected value is of type `"undefined"`.
+
+
 ### Custom Matchers
 
 You can add a custom matcher function using the `expect.addMatcher` function:
