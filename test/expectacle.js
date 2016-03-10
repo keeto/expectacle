@@ -133,9 +133,17 @@ describe('Expectacle', function() {
           done();
         }
       });
+      it('should fail if the two objects are not strictly like each other', function(done) {
+        try {
+          expect({x: true, y: '', z: {a: 1, b: 2}}).toBeLike({x: 1, y: 0, z: {a: true, b: 2}});
+          done(new Error('expect.toBeLike should have failed'));
+        } catch(e) {
+          done();
+        }
+      });
       it('should pass if the two objects are like each other', function(done) {
         try {
-          expect({x: true, y: ''}).toBeLike({x: 1, y: 0}); // sic
+          expect({x: true, y: [1, 2], z: {a: '', b: 2}}).toBeLike({x: true, y: [1, 2], z: {a: '', b: 2}});
           done();
         } catch(e) {
           done(new Error(e));

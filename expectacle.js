@@ -72,23 +72,25 @@
   var typeMatcher = /\[object\s(.*)\]/;
 
   /**
-   * Used to create a custom type matchers that only verifies the type of some
-   * deep property in an object, when using expect(obj).toBeLike({...}).
+   * Used to create a custom comparator objects that can be used in comparisons.
    *
-   * @param {string} [type] The expected type of the value (empty for any type)
+   * @interface
+   * @param {*} expected The expected value
    */
-  function TypeMatcher(type) {
-    this._type = type;
+  function CustomComparator(expected) {
+    this._expected = expected;
   }
 
   /**
    * Called when testing if the actual value meets the expectation for this
    * matcher.
    *
+   * @abstract
+   * @param {*} actual The actual value.
    * @return {boolean} True if the expectation is met, otherwise false.
    */
-  TypeMatcher.prototype.matchExpected = function(actual) {
-    return !this._type || typeOf(actual) === this._type;
+  CustomComparator.prototype.equals = function(actual) {
+    return actual === this._expected;
   };
 
   /**
@@ -97,9 +99,51 @@
    *
    * @return {string}
    */
-  TypeMatcher.prototype.toString = function() {
-    return 'type = ' + (this._type || 'any');
+  CustomComparator.prototype.toString = function() {
+    return this._expected;
   };
+
+  /**
+   * Used to create a custom type matchers that only verifies the type of some
+   * deep property in an object, when using expect(obj).toBeLike({...}).
+   *
+   * @class
+   * @implements {CustomComparator}
+   * @param {string} [type] The expected type of the value (any by default)
+   */
+  function TypeMatcher(type) {
+    CustomComparator.call(this, type);
+  }
+  TypeMatcher.prototype = new CustomComparator();
+  TypeMatcher.prototype.constructor = CustomComparator;
+
+  /**
+   * Called when testing if the actual value meets the expectation for this
+   * matcher.
+   *
+   * @override
+   * @return {boolean} True if the expectation is met, otherwise false.
+   */
+  TypeMatcher.prototype.equals = function(actual) {
+    return !this._expected || typeOf(actual) === this._expected;
+  };
+
+  /**
+   * Used to get the human-readable version of the expected value in the error
+   * message when the match fails.
+   *
+   * @override
+   * @return {string}
+   */
+  TypeMatcher.prototype.toString = function() {
+    return 'type = ' + (this._expected || 'any');
+  };
+
+  function createTypeMatcher(type) {
+    return function() {
+      return new TypeMatcher(type);
+    };
+  }
 
   /**
    * Returns the type of an item as a string.
@@ -157,8 +201,10 @@
   }
 
   /**
-   * The NodeJS assert module's objEquiv function, with the dependence on
-   * microfunctions removed.
+   * Based on the NodeJS assert module's objEquiv function, with the dependence
+   * on microfunctions removed.
+   *
+   * Compares entries with strict equal check comparison.
    *
    * @private
    */
@@ -204,16 +250,18 @@
   }
 
   /**
-   * The NodeJS assert module's deepEqual function, with the buffer test
-   * removed.
+   * Make a deep comparison of two objects.
+   *
+   * Based on the NodeJS assert module's deepEqual function, with the buffer
+   * test removed.
    *
    * @private
    */
   function deepEqual(actual, expected) {
     if (actual === expected) {
       return true;
-    } else if (expected && typeof expected.matchExpected === 'function') {
-      return expected.matchExpected(actual);
+    } else if (expected instanceof CustomComparator) {
+      return expected.equals(actual);
     } else if (actual instanceof Date && expected instanceof Date) {
       return actual.getTime() === expected.getTime();
     } else if (actual instanceof RegExp && expected instanceof RegExp) {
@@ -222,8 +270,8 @@
              actual.multiline === expected.multiline &&
              actual.lastIndex === expected.lastIndex &&
              actual.ignoreCase === expected.ignoreCase;
-    } else if (typeof actual != 'object' && typeof expected != 'object') {
-      return actual == expected;
+    } else if (typeof actual !== 'object' && typeof expected !== 'object') {
+      return actual === expected;
     } else {
       return objEquiv(actual, expected);
     }
@@ -268,7 +316,7 @@
       return value.toString();
     } else if (typeof value === 'function' || value instanceof RegExp) {
       return value.toString();
-    } else if (value && typeof value.matchExpected === 'function') {
+    } else if (value instanceof CustomComparator) {
       return '[match: ' + value.toString() + ']';
     }
     return value;
@@ -884,6 +932,14 @@
   }
 
   /**
+   * Used to create a custom comparator objects that can be used in comparisons.
+   *
+   * @interface
+   * @param {*} expected The expected value
+   */
+  expect.CustomComparator = CustomComparator;
+
+  /**
    * A representation of a null value used as a placeholder for user input.
    *
    * @type {Object}
@@ -909,12 +965,6 @@
       stackFn: expect.fail
     });
   };
-
-  function createTypeMatcher(type) {
-    return function() {
-      return new TypeMatcher(type);
-    }
-  }
 
   /**
    * Wildcard type matchers, useful when checking a deep object
