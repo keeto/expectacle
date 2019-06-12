@@ -557,4 +557,34 @@ describe('Expectacle', function() {
 
   });
 
+  describe('Chaining.', function() {
+    it('should be able to chain matchers', function(done) {
+      try {
+        expect([1, 2, 3]).toBeAnArray().and.toHaveLength(3);
+        done();
+      } catch(e) {
+        done(e);
+      }
+    });
+
+    it('should be able to fail chained matchers', function(done) {
+      try {
+        expect([1, 2, 3]).toBeAnArray().and.toHaveLength(2);
+        done(new Error('Unexpected success.'));
+      } catch(e) {
+        done();
+      }
+    });
+
+    it('should be able to chain promised matchers', function(done) {
+      var retVal = expect.promised(Promise.resolve([1, 2, 3])).toBeAnArray()
+        .and.toHaveLength(2);
+      return retVal.then(function() {
+        done(new Error('Unexpected success'));
+      }, function() {
+        done();
+      })
+    });
+  });
+
 });
