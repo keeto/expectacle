@@ -296,6 +296,8 @@
     return new Shape(name, checker);
   };
 
+  InternalShapes.LiteralArray = InternalShapes.ArrayStructure;
+
   InternalShapes.Object = function(descriptor) {
     descriptor = descriptor || {};
     var shapes = [];
