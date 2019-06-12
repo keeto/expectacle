@@ -498,12 +498,20 @@
     if (this._declareNot) {
       this.not = new ReversedPromisedExpectation(value);
     }
-    this._promise = value;
+    this._promise = Promise.resolve(value);
   }
 
   var promisedNotGetter = function() {
     return this._not ||
       (this._not = new ReversedPromisedExpectation(this._promise));
+  };
+
+  PromisedExpectation.prototype.then = function(resolveFn, rejectFn) {
+    return this._promise.then(resolveFn, rejectFn);
+  };
+
+  PromisedExpectation.prototype.catch = function(rejectFn) {
+    return this._promise.then(null, rejectFn);
   };
 
 
@@ -554,7 +562,9 @@
       }
     };
     if ((!!matcher.call(context, this._expected, value)) != asNot) {
-      return;
+      return {
+        and: this
+      };
     }
     throw new ExpectationError({
       operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
@@ -583,7 +593,7 @@
     };
     var caller = function(expected) {
       if ((!!matcher.call(context, expected, value)) != asNot) {
-        return;
+        return expected;
       }
       throw new ExpectationError({
         operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
@@ -592,7 +602,9 @@
         stackFn: this[name]
       });
     };
-    return this._promise.then(caller, caller);
+    var retValue = this._promise.then(caller, caller);
+    retValue.and = new PromisedExpectation(retValue);
+    return retValue;
   }
 
   /**
@@ -628,6 +640,8 @@
     };
     Expectation.prototype[alias] = caller;
     ReversedExpectation.prototype[alias] = caller;
+    PromisedExpectation.prototype[alias] = caller;
+    ReversedPromisedExpectation.prototype[alias] = caller;
   }
 
   /**
