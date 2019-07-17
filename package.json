@@ -5,6 +5,8 @@
   "main": "expectacle.js",
   "types": "./expectacle.d.ts",
   "scripts": {
+    "fix": "prettier --write expectacle.js test/*.js",
+    "lint": "eslint .",
     "test": "mocha --reporter spec test"
   },
   "repository": {
@@ -22,6 +24,9 @@
     "url": "https://github.com/keeto/expectacle/issues"
   },
   "devDependencies": {
-    "mocha": "^2.4.5"
+    "eslint": "^6.0.1",
+    "eslint-config-correct": "^1.0.4",
+    "mocha": "^2.4.5",
+    "prettier": "^1.18.2"
   }
 }
