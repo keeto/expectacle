@@ -599,17 +599,17 @@ describe('Expectacle', function() {
       }
     });
 
-    it('should be able to chain promised matchers', function(done) {
+    it('should be able to chain promised matchers', function() {
       var retVal = expect
         .promised(Promise.resolve([1, 2, 3]))
         .toBeAnArray()
         .and.toHaveLength(2);
       return retVal.then(
         function() {
-          done(new Error('Unexpected success'));
+          throw new Error('Unexpected success');
         },
         function() {
-          done();
+          // Success
         }
       );
     });
