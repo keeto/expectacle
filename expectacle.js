@@ -425,6 +425,7 @@
     this.operator = options.operator;
     this.expected = options.expected;
     this.received = options.received;
+    this.description = options.description;
     this.message = options.message || this.toString();
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, options.stackFn || ExpectationError);
@@ -468,6 +469,7 @@
     }
     return [
       this.name + ': Expected',
+      this.description,
       JSON.stringify(this.expected, replacer),
       this.operator,
       this.received !== NULL_VALUE
@@ -489,11 +491,13 @@
    *
    * @constructor
    * @param {*} value The value to test.
+   * @param {string} description The value to test.
    */
-  function Expectation(value) {
+  function Expectation(value, description) {
     this._expected = value;
+    this._description = description;
     if (this._declareNot) {
-      this.not = new ReversedExpectation(value);
+      this.not = new ReversedExpectation(value, description);
     }
   }
 
@@ -519,19 +523,22 @@
    * @constructor
    * @extends Expectation
    * @param {*} value The value to test.
+   * @param {string} description The value to test.
    */
-  function ReversedExpectation(value) {
+  function ReversedExpectation(value, description) {
     this._expected = value;
+    this._description = description;
   }
 
-  function PromisedExpectation(value) {
+  function PromisedExpectation(value, description) {
     if (!value || typeOf(value.then) !== 'function') {
       throw new TypeError('Expected a promise.');
     }
     if (this._declareNot) {
-      this.not = new ReversedPromisedExpectation(value);
+      this.not = new ReversedPromisedExpectation(value, description);
     }
     this._promise = Promise.resolve(value);
+    this._description = description;
   }
 
   var promisedNotGetter = function() {
@@ -560,8 +567,9 @@
     PromisedExpectation.prototype._declareNot = true;
   }
 
-  function ReversedPromisedExpectation(value) {
+  function ReversedPromisedExpectation(value, description) {
     this._promise = value;
+    this._description = description;
   }
 
   /**
@@ -603,6 +611,7 @@
       };
     }
     throw new ExpectationError({
+      description: this._description,
       operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
       expected: this._expected,
       received: received,
@@ -1182,14 +1191,15 @@
    * The main expectation function.
    *
    * @param {*} value The expected value.
+   * @param {string} description The value to test.
    * @return {Expectation} An expectation object.
    */
-  function expect(value) {
-    return new Expectation(value);
+  function expect(value, description) {
+    return new Expectation(value, description);
   }
 
-  expect.promised = function(value) {
-    return new PromisedExpectation(value);
+  expect.promised = function(value, description) {
+    return new PromisedExpectation(value, description);
   };
 
   /**

@@ -68,6 +68,12 @@ expect(1).not.toBe(2); // passes, no error.
 expect(1).not.toBe(1); // fails, throws an ExpectationError.
 ```
 
+Expect also takes an optional description as its second parameter, which can be used to add information to the expectation error:
+
+```js
+expect(1, 'number').toBe(2); // fails: "Expected number 1 to be 2"
+```
+
 ### The Matchers
 
 Expectacle comes with the following matchers by default:

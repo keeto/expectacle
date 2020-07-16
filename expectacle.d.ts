@@ -1,9 +1,8 @@
 export = expect;
 
-declare function expect(value?: any): expect.Expectation;
+declare function expect(value?: any, description?: string): expect.Expectation;
 
 declare namespace expect {
-
   export interface Chainer {
     and: Expectation;
   }
@@ -49,7 +48,7 @@ declare namespace expect {
 
     toBeLike(v: any): Chainer;
 
-    toHaveShape(v: {[name: string]: Shape} | Shape): Chainer;
+    toHaveShape(v: { [name: string]: Shape } | Shape): Chainer;
 
     toThrow(v: any): Chainer;
     toMatch(v: any): Chainer;
@@ -57,19 +56,27 @@ declare namespace expect {
 
   interface PromisedExpectation<T> extends Expectation {
     then<TResult1 = T, TResult2 = never>(
-      onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null,
-      onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+      onfulfilled?:
+        | ((value: T) => TResult1 | PromiseLike<TResult1>)
+        | undefined
+        | null,
+      onrejected?:
+        | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+        | undefined
+        | null
     ): Promise<TResult1 | TResult2>;
 
     catch<TResult = never>(
-      onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+      onrejected?:
+        | ((reason: any) => TResult | PromiseLike<TResult>)
+        | undefined
+        | null
     ): Promise<T | TResult>;
-
   }
 
   interface Shape {
     name: string;
-    checker: () => void
+    checker: () => void;
   }
 
   interface InternalShape {
@@ -89,12 +96,14 @@ declare namespace expect {
     Undefined: () => Shape;
   }
 
-  export const NULL_VALUE : {};
-  export const shape : InternalShape;
-  export function promised<T = any>(value: T): expect.PromisedExpectation<T>;
+  export const NULL_VALUE: {};
+  export const shape: InternalShape;
+  export function promised<T = any>(
+    value: T,
+    description?: string
+  ): expect.PromisedExpectation<T>;
   export function typeOf(value: any): string;
   export function fail(opt_message?: string): void;
   export function addMatcher(name: string, matcher: any): void;
-  export function addMatchers(matchers: {[name: string]: any}): void;
-
+  export function addMatchers(matchers: { [name: string]: any }): void;
 }

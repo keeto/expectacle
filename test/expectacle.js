@@ -614,4 +614,20 @@ describe('Expectacle', function() {
       );
     });
   });
+
+  describe('Descriptions', function() {
+    it('should include a description if defined', function(done) {
+      try {
+        expect([1, 2, 3], 'my-array-description')
+          .toBeAnArray()
+          .and.toHaveLength(2);
+      } catch (e) {
+        if ((/my-array-description/).test(e.message)) {
+          done();
+        }
+        throw new Error('Invalid description');
+      }
+    });
+
+  });
 });
