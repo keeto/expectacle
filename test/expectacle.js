@@ -622,12 +622,30 @@ describe('Expectacle', function() {
           .toBeAnArray()
           .and.toHaveLength(2);
       } catch (e) {
-        if ((/my-array-description/).test(e.message)) {
+        if (/my-array-description/.test(e.message)) {
           done();
         }
         throw new Error('Invalid description');
       }
     });
+  });
 
+  describe('Error properties', function() {
+    it('should throw an ExpectationError with known properties', function() {
+      var error = null;
+      try {
+        expect('a').toBe('b');
+      } catch (e) {
+        error = e;
+      }
+      if (!error) {
+        throw new Error('Expected error to be thrown.');
+      }
+      expect(error.name).toBe('ExpectationError');
+      expect(error.actual).toBe('a');
+      expect(error.expected).toBe('b');
+      expect(error.operator).toBe('to be');
+      expect(error.message).toBe('ExpectationError: Expected  "a" to be "b"');
+    });
   });
 });
