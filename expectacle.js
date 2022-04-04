@@ -34,9 +34,9 @@
   /**
    * @typedef {MatcherFunction}
    * @type {function}
+   * @param {*} actual The actual value.
    * @param {*} expected The expected value.
-   * @param {*} received The received value.
-   * @return {boolean} True if the expected value passes the check, false
+   * @return {boolean} True if the actual value passes the check, false
    *     otherwise.
    */
 
@@ -423,9 +423,8 @@
     }
     this.name = 'ExpectationError';
     this.operator = options.operator;
+    this.actual = options.actual;
     this.expected = options.expected;
-    this.received = options.received;
-    this.actual = options.received;
     this.description = options.description;
     this.message = options.message || this.toString();
     if (Error.captureStackTrace) {
@@ -471,10 +470,10 @@
     return [
       this.name + ': Expected',
       this.description,
-      JSON.stringify(this.expected, replacer),
+      JSON.stringify(this.actual, replacer),
       this.operator,
-      this.received !== NULL_VALUE
-        ? JSON.stringify(this.received, replacer)
+      this.expected !== NULL_VALUE
+        ? JSON.stringify(this.expected, replacer)
         : ''
     ].join(' ');
   };
@@ -491,19 +490,19 @@
    * Represents an expectation.
    *
    * @constructor
-   * @param {*} value The value to test.
+   * @param {*} actual The actual value to test.
    * @param {string} description The value to test.
    */
-  function Expectation(value, description) {
-    this._expected = value;
+  function Expectation(actual, description) {
+    this._actual = actual;
     this._description = description;
     if (this._declareNot) {
-      this.not = new ReversedExpectation(value, description);
+      this.not = new ReversedExpectation(actual, description);
     }
   }
 
   var notGetter = function() {
-    return this._not || (this._not = new ReversedExpectation(this._expected));
+    return this._not || (this._not = new ReversedExpectation(this._actual));
   };
 
   // For environments that support getters, we define getters for the 'not'
@@ -523,22 +522,22 @@
    *
    * @constructor
    * @extends Expectation
-   * @param {*} value The value to test.
+   * @param {*} actual The actual value to test.
    * @param {string} description The value to test.
    */
-  function ReversedExpectation(value, description) {
-    this._expected = value;
+  function ReversedExpectation(actual, description) {
+    this._actual = actual;
     this._description = description;
   }
 
-  function PromisedExpectation(value, description) {
-    if (!value || typeOf(value.then) !== 'function') {
+  function PromisedExpectation(actual, description) {
+    if (!actual || typeOf(actual.then) !== 'function') {
       throw new TypeError('Expected a promise.');
     }
     if (this._declareNot) {
-      this.not = new ReversedPromisedExpectation(value, description);
+      this.not = new ReversedPromisedExpectation(actual, description);
     }
-    this._promise = Promise.resolve(value);
+    this._promise = Promise.resolve(actual);
     this._description = description;
   }
 
@@ -595,18 +594,18 @@
    * @param {module:expectacle.MatcherFunction} matcher The matcher function.
    * @param {boolean} asNot If set to true, the matcher will be applied as a
    *     "not matcher."
-   * @param {*} value The received value.
+   * @param {*} value The expected value.
    * @return {Object} A joiner.
    * @private
    */
   function applyMatcher(name, matcher, asNot, value) {
-    var received = arguments.length === 4 ? value : NULL_VALUE;
+    var expected = arguments.length === 4 ? value : NULL_VALUE;
     var context = {
-      setReceived: function(_value) {
-        received = _value;
+      setExpected: function(_value) {
+        expected = _value;
       }
     };
-    if (!!matcher.call(context, this._expected, value) !== asNot) {
+    if (!!matcher.call(context, this._actual, value) !== asNot) {
       return {
         and: this
       };
@@ -614,8 +613,8 @@
     throw new ExpectationError({
       description: this._description,
       operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
-      expected: this._expected,
-      received: received,
+      actual: this._actual,
+      expected: expected,
       stackFn: this[name]
     });
   }
@@ -627,25 +626,25 @@
    * @param {module:expectacle.MatcherFunction} matcher The matcher function.
    * @param {boolean} asNot If set to true, the matcher will be applied as a
    *     "not matcher."
-   * @param {*} value The received value.
+   * @param {*} value The expected value.
    * @return {Object} A joiner.
    * @private
    */
   function applyPromisedMatcher(name, matcher, asNot, value) {
-    var received = arguments.length === 4 ? value : NULL_VALUE;
+    var expected = arguments.length === 4 ? value : NULL_VALUE;
     var context = {
-      setReceived: function(_value) {
-        received = _value;
+      setExpected: function(_value) {
+        expected = _value;
       }
     };
-    var caller = function(expected) {
-      if (!!matcher.call(context, expected, value) !== asNot) {
-        return expected;
+    var caller = function(actual) {
+      if (!!matcher.call(context, actual, value) !== asNot) {
+        return actual;
       }
       throw new ExpectationError({
         operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
+        actual: actual,
         expected: expected,
-        received: received,
         stackFn: this[name]
       });
     };
@@ -722,57 +721,57 @@
   addMatchers(
     /** @lends Expectation.prototype */ {
       /**
-       * Returns whether the original value is identical to the passed value.
+       * Returns whether the actual value is identical to the expected value.
        * Uses the `===` operator.
        *
-       * @param {*} expected The expected value.
-       * @param {*} value The value to compare the original value against.
+       * @param {*} actual The actual value.
+       * @param {*} expected The value to compare the original value against.
        * @return {boolean}
        */
-      toBe: function(expected, value) {
-        return expected === value;
+      toBe: function(actual, expected) {
+        return actual === expected;
       },
 
       /**
-       * Returns whether the original value is equal to the passed value. Uses
+       * Returns whether the original value is equal to the expected value. Uses
        * the `==` operator.
        *
-       * @param {*} expected The expected value.
-       * @param {*} value The value to compare the original value against.
+       * @param {*} actual The actual value.
+       * @param {*} expected The value to compare the original value against.
        * @return {boolean}
        */
-      toEqual: function(expected, value) {
+      toEqual: function(actual, expected) {
         // eslint-disable-next-line eqeqeq
-        return expected == value;
+        return actual == expected;
       },
 
       /**
        * Returns whether the original value is an instance of the constructor
        * function passed.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {function} constructor The constructor function to check
        *     against.
        * @return {boolean}
        */
-      toBeAnInstanceOf: function(expected, constructor) {
+      toBeAnInstanceOf: function(actual, constructor) {
         if (typeOf(constructor) !== 'function') {
           throw new ExpectationError({
             message: 'toBeAnInstanceOf matcher requires a constructor function.'
           });
         }
-        return instanceOf(expected, constructor);
+        return instanceOf(actual, constructor);
       },
 
       /**
        * Returns whether the original value is of the  passed type-string.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} type The type name in lowercase.
        * @return {boolean}
        */
-      toBeOfType: function(expected, type) {
-        return typeOf(expected) === type;
+      toBeOfType: function(actual, type) {
+        return typeOf(actual) === type;
       },
 
       /**
@@ -780,91 +779,91 @@
        *
        * Note that this will be false if the original value is an array.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeObject: function(expected) {
-        return typeOf(expected) === 'object';
+      toBeObject: function(actual) {
+        return typeOf(actual) === 'object';
       },
 
       /**
        * Returns whether the original value is a function.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeFunction: function(expected) {
-        return typeOf(expected) === 'function';
+      toBeFunction: function(actual) {
+        return typeOf(actual) === 'function';
       },
 
       /**
        * Returns whether the original value is an array.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeArray: function(expected) {
-        return typeOf(expected) === 'array';
+      toBeArray: function(actual) {
+        return typeOf(actual) === 'array';
       },
 
       /**
        * Returns whether the original value is a string.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeString: function(expected) {
-        return typeOf(expected) === 'string';
+      toBeString: function(actual) {
+        return typeOf(actual) === 'string';
       },
 
       /**
        * Returns whether the original value is a number.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeNumber: function(expected) {
-        return typeOf(expected) === 'number';
+      toBeNumber: function(actual) {
+        return typeOf(actual) === 'number';
       },
 
       /**
        * Returns whether the original value is a boolean.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeBoolean: function(expected) {
-        return typeOf(expected) === 'boolean';
+      toBeBoolean: function(actual) {
+        return typeOf(actual) === 'boolean';
       },
 
       /**
        * Returns whether the original value is null.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeNull: function(expected) {
-        return expected === null;
+      toBeNull: function(actual) {
+        return actual === null;
       },
 
       /**
        * Returns whether the original value is undefined.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeUndefined: function(expected) {
-        return expected === undefined;
+      toBeUndefined: function(actual) {
+        return actual === undefined;
       },
 
       /**
        * Returns whether the original value is NaN.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeNaN: function(expected) {
-        return isNaN(expected);
+      toBeNaN: function(actual) {
+        return isNaN(actual);
       },
 
       /**
@@ -874,11 +873,11 @@
        * Note that this function does not cast the original
        * value into a boolean.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeTrue: function(expected) {
-        return expected === true;
+      toBeTrue: function(actual) {
+        return actual === true;
       },
 
       /**
@@ -888,11 +887,11 @@
        * Note that this function does not cast the original
        * value into a boolean.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeFalse: function(expected) {
-        return expected === false;
+      toBeFalse: function(actual) {
+        return actual === false;
       },
 
       /**
@@ -901,11 +900,11 @@
        * A truthy value is any javascript value that can be
        * cast into the boolean `true` value.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeTruthy: function(expected) {
-        return !!expected === true;
+      toBeTruthy: function(actual) {
+        return !!actual === true;
       },
 
       /**
@@ -914,37 +913,37 @@
        * A falsy value is any javascript value that can be
        * cast into the boolean `false` value.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeFalsy: function(expected) {
-        return !!expected === false;
+      toBeFalsy: function(actual) {
+        return !!actual === false;
       },
 
       /**
-       * Returns whether the expected value has the given length.
+       * Returns whether the actual value has the given length.
        *
        * For strings, arrays, arguments and any object value that has a `length`
        * property, the value's `length` property will be checked. For objects
        * without a `length` property, the number of the object's keys will be
        * checked.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {number} length The expected length.
        * @return {boolean}
        */
-      toHaveLength: function(expected, length) {
-        var type = typeOf(expected);
+      toHaveLength: function(actual, length) {
+        var type = typeOf(actual);
         switch (type) {
           case 'string':
           case 'array':
           case 'arguments':
-            return expected.length === length;
+            return actual.length === length;
           case 'object':
             return (
-              ('length' in expected
-                ? expected.length
-                : Object.keys(expected).length) === length
+              ('length' in actual
+                ? actual.length
+                : Object.keys(actual).length) === length
             );
           default:
             return false;
@@ -952,27 +951,27 @@
       },
 
       /**
-       * Returns whether the expected value has a length of 0.
+       * Returns whether the actual value has a length of 0.
        *
        * For strings, arrays, arguments and any object value that has a `length`
        * property, the value's `length` property will be checked. For objects
        * without a `length` property, the number of the object's keys will be
        * checked
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @return {boolean}
        */
-      toBeEmpty: function(expected) {
-        var type = typeOf(expected);
+      toBeEmpty: function(actual) {
+        var type = typeOf(actual);
         switch (type) {
           case 'string':
           case 'array':
           case 'arguments':
-            return !expected.length;
+            return !actual.length;
           case 'object':
-            return 'length' in expected
-              ? !expected.length
-              : !Object.keys(expected).length;
+            return 'length' in actual
+              ? !actual.length
+              : !Object.keys(actual).length;
           default:
             return false;
         }
@@ -982,13 +981,13 @@
        * Returns whether the original object value has a member of a particular
        * name.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} name The name of the member.
        * @return {boolean}
        */
-      toHaveMember: function(expected, name) {
+      toHaveMember: function(actual, name) {
         try {
-          return name in expected;
+          return name in actual;
         } catch (e) {
           return false;
         }
@@ -998,13 +997,13 @@
        * Matches like toHaveMember, but only checks for members that are the
        * value's own (i.e., not inherited).
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} name The name of the member.
        * @return {boolean}
        */
-      toHaveOwnMember: function(expected, name) {
+      toHaveOwnMember: function(actual, name) {
         try {
-          return expected.hasOwnProperty(name) && name in expected;
+          return actual.hasOwnProperty(name) && name in actual;
         } catch (e) {
           return false;
         }
@@ -1017,13 +1016,13 @@
        * Unlike `toHaveMember`, this function's definition of "property"
        * does not include function members (i.e., methods).
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} name The name of the property.
        * @return {boolean}
        */
-      toHaveProperty: function(expected, name) {
+      toHaveProperty: function(actual, name) {
         try {
-          return name in expected && typeOf(expected[name]) !== 'function';
+          return name in actual && typeOf(actual[name]) !== 'function';
         } catch (e) {
           return false;
         }
@@ -1033,16 +1032,16 @@
        * Matches like toHaveProperty, but only checks for properties that are
        * the value's own (i.e., not inherited).
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} name The name of the property.
        * @return {boolean}
        */
-      toHaveOwnProperty: function(expected, name) {
+      toHaveOwnProperty: function(actual, name) {
         try {
           return (
-            expected.hasOwnProperty(name) &&
-            name in expected &&
-            typeOf(expected[name]) !== 'function'
+            actual.hasOwnProperty(name) &&
+            name in actual &&
+            typeOf(actual[name]) !== 'function'
           );
         } catch (e) {
           return false;
@@ -1055,13 +1054,13 @@
        *
        * Unlike `toHaveMember`, this matcher only checks for function members.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} name The name of the method.
        * @return {boolean}
        */
-      toHaveMethod: function(expected, name) {
+      toHaveMethod: function(actual, name) {
         try {
-          return name in expected && typeOf(expected[name]) === 'function';
+          return name in actual && typeOf(actual[name]) === 'function';
         } catch (e) {
           return false;
         }
@@ -1071,16 +1070,16 @@
        * Matches like toHaveMethod, but only checks for methods that are the
        * value's own (i.e., not inherited).
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string} name The name of the method.
        * @return {boolean}
        */
-      toHaveOwnMethod: function(expected, name) {
+      toHaveOwnMethod: function(actual, name) {
         try {
           return (
-            expected.hasOwnProperty(name) &&
-            name in expected &&
-            typeOf(expected[name]) === 'function'
+            actual.hasOwnProperty(name) &&
+            name in actual &&
+            typeOf(actual[name]) === 'function'
           );
         } catch (e) {
           return false;
@@ -1091,61 +1090,61 @@
        * Returns whether the original value is equivalent in composition
        * to the passed value.
        *
-       * @param {*} expected The expected value.
-       * @param {*} value The value to check against.
+       * @param {*} actual The actual value.
+       * @param {*} expected The value to check against.
        * @return {boolean}
        */
-      toBeLike: function(expected, value) {
-        return deepEqual(expected, value);
+      toBeLike: function(actual, expected) {
+        return deepEqual(actual, expected);
       },
 
-      toHaveShape: function(expected, shape) {
-        if (!compareShape(shape, expected)) {
-          this.setReceived(JSON.parse(JSON.stringify(shape, replacer)));
+      toHaveShape: function(actual, shape) {
+        if (!compareShape(shape, actual)) {
+          this.setExpected(JSON.parse(JSON.stringify(shape, replacer)));
           return false;
         }
         return true;
       },
 
       /**
-       * Returns whether the expected function value has thrown.
+       * Returns whether the actual function value has thrown.
        *
        * This matcher can be used without passing the `error` argument, in which
-       * case the matcher only checks if the expected value throws.
+       * case the matcher only checks if the actual value throws.
        *
        * Optionally, one could pass an `error` argument that could either be a
        * string, a regular expression or a constructor function:
        *
        * - If the `error` argument is a string, the `error` argument is compared
-       *   against the `message` of the expected value's thrown error.
+       *   against the `message` of the actual value's thrown error.
        * - If the `error` argument is a regular expression, the `message` of the
-       *   expected value's thrown error is tested against the `error` argument.
+       *   actual value's thrown error is tested against the `error` argument.
        * - If the `error` argument is a constructor function, the `name`
-       *   property of the expected value's thrown error is compared against the
+       *   property of the actual value's thrown error is compared against the
        *   `name` value of the constructor function's `prototype`.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {string?|regexp?|function?} error If provided, the matcher will
        *     check against this based on the rules given above.
        * @return {boolean}
        */
-      toThrow: function(expected, error) {
+      toThrow: function(actual, error) {
         var errorType = typeOf(error);
         if (error) {
           if (
             errorType === 'function' &&
             (error === Error || error.prototype instanceof Error)
           ) {
-            this.setReceived(error.prototype.name);
+            this.setExpected(error.prototype.name);
           } else {
-            this.setReceived(error);
+            this.setExpected(error);
           }
         }
-        if (typeOf(expected) !== 'function') {
+        if (typeOf(actual) !== 'function') {
           return false;
         }
         try {
-          expected();
+          actual();
           return false;
         } catch (e) {
           if (!error) {
@@ -1165,15 +1164,15 @@
       },
 
       /**
-       * Returns whether the expected value matches a regular expression.
+       * Returns whether the actual value matches a regular expression.
        *
-       * @param {*} expected The expected value.
+       * @param {*} actual The actual value.
        * @param {regexp} expression The regular expression to check.
        * @return {boolean}
        */
-      toMatch: function(expected, expression) {
-        this.setReceived(expression.toString());
-        return expression.test(expected);
+      toMatch: function(actual, expression) {
+        this.setExpected(expression.toString());
+        return expression.test(actual);
       }
     }
   );
@@ -1191,16 +1190,16 @@
   /**
    * The main expectation function.
    *
-   * @param {*} value The expected value.
+   * @param {*} actual The actual value.
    * @param {string} description The value to test.
    * @return {Expectation} An expectation object.
    */
-  function expect(value, description) {
-    return new Expectation(value, description);
+  function expect(actual, description) {
+    return new Expectation(actual, description);
   }
 
-  expect.promised = function(value, description) {
-    return new PromisedExpectation(value, description);
+  expect.promised = function(actual, description) {
+    return new PromisedExpectation(actual, description);
   };
 
   /**

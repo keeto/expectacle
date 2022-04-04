@@ -78,49 +78,49 @@ expect(1, 'number').toBe(2); // fails: "Expected number 1 to be 2"
 
 Expectacle comes with the following matchers by default:
 
-#### `toBe(value)`
+#### `toBe(expected)`
 
-The *identity matcher* checks whether the expectation's value is identical to the passed value. It uses the `===` operator internally, and therefore disregards any type casting rules.
+The *identity matcher* checks whether the actual value is identical to the expected value. It uses the `===` operator internally, and therefore disregards any type casting rules.
 
-#### `toEqual(value)`
+#### `toEqual(expected)`
 
-The *equality matcher* checks whether the expectation's value is equal to the passed value. It uses the `==` operator internally, and therefore coerces types.
+The *equality matcher* checks whether the actual value is equal to the expected value. It uses the `==` operator internally, and therefore coerces types.
 
-#### `toBeLike(value)`
+#### `toBeLike(expected)`
 
-Checks whether the expected value is *similar* to the passed value. It uses a deep-comparison of keys and properties for objects.
+Checks whether the actual value is *similar* to the expected value. It uses a deep-comparison of keys and properties for objects.
 
 #### `toThrow([error])`
 
-Checks whether a function expected value throws an error.
+Checks whether a function throws an error.
 
-This matcher can be used without passing the `error` argument, in which case the matcher only checks if the expected value throws.
+This matcher can be used without passing the `error` argument, in which case the matcher only checks if the function throws.
 
 Optionally, one could pass an `error` argument that could either be a string, a regular expression or a constructor function:
 
-- If the `error` argument is a string, the `error` argument is compared against the `message` of the expected value's thrown error.
-- If the `error` argument is a regular expression, the `message` of the expected value's thrown error is tested against the `error` argument.
-- If the `error` argument is a constructor function, the `name` property of the expected value's thrown error is compared against the `name` value of the constructor function's `prototype`.
+- If the `error` argument is a string, the `error` argument is compared against the `message` of the thrown error.
+- If the `error` argument is a regular expression, the `message` of the thrown error is tested against the `error` argument.
+- If the `error` argument is a constructor function, the `name` property of the thrown error is compared against the `name` value of the constructor function's `prototype`.
 
 #### `toMatch(regularExpression)`
 
-Checks whether the expected value's string representation matches the passed `regularExpression` argument.
+Checks whether the actual value's string representation matches the passed `regularExpression` argument.
 
 #### `toHaveLength(length)`
 
-Checks whether the expected value is of the passed `length`.
+Checks whether the actual value is of the passed `length`.
 
-This matcher uses the `length` property if it is available (e.g., in strings, arrays, arguments and any object that has a `length` property). If the expected value is an object *without* a length property, this matcher check the number of keys (i.e., member/property names).
+This matcher uses the `length` property if it is available (e.g., in strings, arrays, arguments and any object that has a `length` property). If the actual value is an object *without* a length property, this matcher check the number of keys (i.e., member/property names).
 
 #### `toBeEmpty()`
 
-Checks whether the expected value is empty.
+Checks whether the actual value is empty.
 
-This matcher uses the `length` property if it is available (e.g., in strings, arrays, arguments and any object that has a `length` property). If the expected value is an object *without* a length property, this matcher check the number of keys (i.e., member/property names).
+This matcher uses the `length` property if it is available (e.g., in strings, arrays, arguments and any object that has a `length` property). If the actual value is an object *without* a length property, this matcher check the number of keys (i.e., member/property names).
 
 #### `toHaveMember(name)`
 
-Checks whether the expected value has a member (i.e., property or method) with a name corresponding to the passed argument.
+Checks whether the actual value has a member (i.e., property or method) with a name corresponding to the passed argument.
 
 #### `toHaveOwnMember(name)`
 
@@ -128,7 +128,7 @@ Matches like `toHaveMember`, but disregards any inherited members.
 
 #### `toHaveProperty(name)`
 
-Checks whether the expected value has a property (i.e., non-function member) with a name corresponding to the passed argument.
+Checks whether the actual value has a property (i.e., non-function member) with a name corresponding to the passed argument.
 
 #### `toHaveOwnProperty(name)`
 
@@ -136,7 +136,7 @@ Matches like `toHaveProperty`, but disregards any inherited properties.
 
 #### `toHaveMethod(name)`
 
-Checks whether the expected value has a method (i.e., function member) with a name corresponding to the passed argument.
+Checks whether the actual value has a method (i.e., function member) with a name corresponding to the passed argument.
 
 #### `toHaveOwnMember(name)`
 
@@ -154,63 +154,63 @@ This function is implemented using `Object.prototype.toString` to get the type's
 
 #### `toBeBoolean()` / `toBeABoolean()`
 
-Checks whether the expected value is a boolean.
+Checks whether the actual value is a boolean.
 
 #### `toBeArray()` / `toBeAnArray()`
 
-Checks whether the expected value is an array.
+Checks whether the actual value is an array.
 
 #### `toBeFunction()` / `toBeAFunction()`
 
-Checks whether the expected value is a function.
+Checks whether the actual value is a function.
 
 #### `toBeNumber()` / `toBeANumber()`
 
-Checks whether the expected value is a number.
+Checks whether the actual value is a number.
 
 #### `toBeObject()` / `toBeAnObject()`
 
-Checks whether the expected value is an object (but not an array).
+Checks whether the actual value is an object (but not an array).
 
 #### `toBeString()` / `toBeAString()`
 
-Checks whether the expected value is a string.
+Checks whether the actual value is a string.
 
 #### `toBeNull()`
 
-Checks whether the expected value is `null`.
+Checks whether the actual value is `null`.
 
 #### `toBeUndefined()`
 
-Checks whether the expected value is `undefined`.
+Checks whether the actual value is `undefined`.
 
 #### `toBeNaN()`
 
-Checks whether the expected value is `NaN`.
+Checks whether the actual value is `NaN`.
 
 #### `toBeTrue()`
 
-Checks whether the expected value is `true`.
+Checks whether the actual value is `true`.
 
 #### `toBeFalse()`
 
-Checks whether the expected value is `false`.
+Checks whether the actual value is `false`.
 
 #### `toBeTruthy()`
 
-Checks whether the expected value is truthy (i.e., coerces as a boolean `true` value).
+Checks whether the actual value is truthy (i.e., coerces as a boolean `true` value).
 
 #### `toBeFalsy()`
 
-Checks whether the expected value is falsy (i.e., coerces as a boolean `false` value).
+Checks whether the actual value is falsy (i.e., coerces as a boolean `false` value).
 
 #### `toHaveShape(shape)`
 
-Checks whether the expected object has a particular shape. See the "Shapes" section below.
+Checks whether the actual object has a particular shape. See the "Shapes" section below.
 
 ### Shapes
 
-Shapes are a way to verify the structure of the expected value in your tests, without verifying the actual value.
+Shapes are a way to verify the structure of the actual value in your tests, without verifying the actual value.
 
 You can use the `toHaveShape()` method, passing it a shape:
 
@@ -244,59 +244,59 @@ All built-in shapes are available via `expect.shape`.
 
 #### `expect.shape.Arguments()`
 
-Checks the expected value is of type `"arguments"`.
+Checks the actual value is of type `"arguments"`.
 
 #### `expect.shape.Array(shape)`
 
-When provided with a `shape`, checks whether the expected value is an array, each element of which has the provided `shape`.
+When provided with a `shape`, checks whether the actual value is an array, each element of which has the provided `shape`.
 
-If no `shape` is provided, it only checks that the expected value is an array.
+If no `shape` is provided, it only checks that the actual value is an array.
 
 #### `expect.shape.Boolean()`
 
-Checks the expected value is of type `"boolean"`.
+Checks the actual value is of type `"boolean"`.
 
 #### `expect.shape.Date()`
 
-Checks the expected value is of type `"date"`.
+Checks the actual value is of type `"date"`.
 
 #### `expect.shape.Function()`
 
-Checks the expected value is of type `"function"`.
+Checks the actual value is of type `"function"`.
 
 #### `expect.shape.Literal(value)`
 
-Checks that the expected value is equal (`===`) to the given `value`.
+Checks that the actual value is equal (`===`) to the given `value`.
 
 #### `expect.shape.LiteralArray(shapesArray)`
 
-Checks that each item in the expected array value corresponds to the shape in the same index in the provided `shapesArray`.
+Checks that each item in the actual array value corresponds to the shape in the same index in the provided `shapesArray`.
 
 #### `expect.shape.Null()`
 
-Checks the expected value is of type `"null"`.
+Checks the actual value is of type `"null"`.
 
 #### `expect.shape.Number()`
 
-Checks the expected value is of type `"number"`.
+Checks the actual value is of type `"number"`.
 
 #### `expect.shape.Object(shapeDescriptor)`
 
-If an object `shapeDescriptor` is provided, checks if the expected object value's properties are of the shape of the corresponding `shapeDescriptor`.
+If an object `shapeDescriptor` is provided, checks if the actual object value's properties are of the shape of the corresponding `shapeDescriptor`.
 
-If no `shapeDescriptor` is provided, it simply checks if the expected value is an object.
+If no `shapeDescriptor` is provided, it simply checks if the actual value is an object.
 
 #### `expect.shape.RegExp()`
 
-Checks the expected value is of type `"regexp"`.
+Checks the actual value is of type `"regexp"`.
 
 #### `expect.shape.String()`
 
-Checks the expected value is of type `"string"`.
+Checks the actual value is of type `"string"`.
 
 #### `expect.shape.Undefined()`
 
-Checks the expected value is of type `"undefined"`.
+Checks the actual value is of type `"undefined"`.
 
 
 ### Custom Matchers
@@ -307,14 +307,14 @@ You can add a custom matcher function using the `expect.addMatcher` function:
 expect.addMatcher(name, matcherFunction);
 ```
 
-A `matcherFunction` is a function that receives two arguments and returns a boolean. The first argument is the expected value (i.e., the value passed to the `expect` function), and the second argument is the value passed to the matcher function when called (which can be empty; more on that in a bit).
+A `matcherFunction` is a function that receives two arguments and returns a boolean. The first argument is the actual value (i.e., the value passed to the `expect` function), and the second argument is the value passed to the matcher function when called (which can be empty; more on that in a bit).
 
 ```js
-expect.addMatcher('toStartWith', function(expected, prefix) {
+expect.addMatcher('toStartWith', function(actual, prefix) {
   if (prefix == expect.NULL_VALUE || !prefix) {
     expect.fail('toStartWith requires a prefix argument.'); // throw an error
   }
-  return expected.toString().indexOf(prefix) == 0;
+  return actual.toString().indexOf(prefix) == 0;
 });
 
 expect('hello').toStartWith('he'); // passes.
@@ -322,7 +322,7 @@ expect('hello').not.toStartWith('he'); // fails; throws an error.
 expect('hello').toStartWith(); // fails; throws an error because no prefix.
 ```
 
-The `matcherFunction` must return `true` if the expected value passes the check and `false` if it doesn't. Expectacle handles throwing the function automatically, so a simple boolean return value will suffice. The `addMatcher` function also creates a reversed matcher automatically.
+The `matcherFunction` must return `true` if the actual value passes the check and `false` if it doesn't. Expectacle handles throwing the function automatically, so a simple boolean return value will suffice. The `addMatcher` function also creates a reversed matcher automatically.
 
 In cases where the user of the matcher does not provide an argument to the matcher, a special value `expect.NULL_VALUE` is passed to the matcher instead. This is done in order to distinguish when the user passes values like `undefined` and `null` or when they just fail to provide an argument entirely.
 
@@ -330,7 +330,7 @@ In cases where the user of the matcher does not provide an argument to the match
 
 #### `typeOf`
 
-The function `expect.typeOf` can be used to get the type of a value. This function is used internally by the default matchers.
+The function `expect.typeOf` can be used to get the type name of a value. This function is used internally by the default matchers.
 
 #### `fail`
 
