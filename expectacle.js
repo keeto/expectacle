@@ -2,7 +2,7 @@
  *
  * The MIT License
  *
- * Copyright (c) 2014 Mark Obcena <http://keetology.com>
+ * Copyright (c) 2022 Mark Obcena <http://keetology.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

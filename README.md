@@ -339,4 +339,4 @@ The function `expect.fail` can be used to raise an ExpectationError. It takes on
 About
 -----
 
-Copyright 2015, Mark "Keeto" Obcena. Released under an MIT-Style License.
+Copyright 2022, Mark "Keeto" Obcena. Released under an MIT-Style License.
