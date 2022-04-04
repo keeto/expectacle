@@ -425,6 +425,7 @@
     this.operator = options.operator;
     this.expected = options.expected;
     this.received = options.received;
+    this.actual = options.received;
     this.description = options.description;
     this.message = options.message || this.toString();
     if (Error.captureStackTrace) {
