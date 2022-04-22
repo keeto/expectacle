@@ -587,6 +587,17 @@
       .replace(/\Wna\Wn/g, ' NaN');
   }
 
+  function objectAssign(target, source) {
+    if (source) {
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  }
+
   /**
    * Applies a matcher to a set of arguments.
    *
@@ -600,7 +611,11 @@
    */
   function applyMatcher(name, matcher, asNot, value) {
     var expected = arguments.length === 4 ? value : NULL_VALUE;
+    var errorProperties = {};
     var context = {
+      setErrorProperties: function(errProps) {
+        errorProperties = errProps;
+      },
       setExpected: function(_value) {
         expected = _value;
       }
@@ -610,13 +625,13 @@
         and: this
       };
     }
-    throw new ExpectationError({
+    throw new ExpectationError(objectAssign({
       description: this._description,
       operator: (asNot ? 'not ' : '') + makeHumanReadable(name),
       actual: this._actual,
       expected: expected,
       stackFn: this[name]
-    });
+    }, errorProperties));
   }
 
   /**
@@ -1140,26 +1155,76 @@
             this.setExpected(error);
           }
         }
+
         if (typeOf(actual) !== 'function') {
-          return false;
+          throw new ExpectationError({
+            message:
+              'The value passed to expect() must be a ' +
+              'function when toThrow is used.',
+            actual: typeOf(actual),
+            expected: 'function'
+          });
         }
+
+        var actualError = NULL_VALUE;
         try {
           actual();
-          return false;
         } catch (e) {
-          if (!error) {
-            return true;
+          actualError = e;
+        }
+        if (actualError === NULL_VALUE) {
+          this.setErrorProperties({
+            message: 'Expected function to throw',
+            actual: null,
+            expected: error
+          });
+          return false;
+        }
+
+        if (!error) {
+          return true;
+        }
+        if (!(actualError instanceof Error)) {
+          this.setErrorProperties({
+            message:
+              'Expected the thrown value to inherit from Error, got ' +
+              typeOf(actualError),
+            actual: actualError,
+            expected: error
+          });
+          return false;
+        }
+        switch (errorType) {
+          case 'string': {
+            if (actualError.message === error) {
+              return true;
+            }
+            this.setErrorProperties({
+              message:
+                'Expected function to throw an error with a message ' +
+                'that match the expected string',
+              actual: actualError.message,
+              expected: error
+            });
+            return false;
           }
-          switch (errorType) {
-            case 'string':
-              return e.message === error;
-            case 'regexp':
-              return error.test(e.message);
-            case 'function':
-              return e.name === error.prototype.name;
-            default:
-              return false;
+          case 'regexp': {
+            if (error.test(actualError.message)) {
+              return true;
+            }
+            this.setErrorProperties({
+              message:
+                'Expected function to throw an error with a message that ' +
+                'match the expected regexp pattern',
+              actual: actualError.message,
+              expected: error.toString()
+            });
+            return false;
           }
+          case 'function':
+            return actualError.name === error.prototype.name;
+          default:
+            return false;
         }
       },
 
