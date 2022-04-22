@@ -428,6 +428,161 @@ describe('Expectacle', function() {
       });
     });
 
+    describe('toThrow', function() {
+      it('should fail if the function does not throw.', function() {
+        var fn = function() {
+          return 'x';
+        };
+        var error = null;
+        try {
+          expect(fn).toThrow('y');
+        } catch (e) {
+          error = e;
+        }
+        if (!error) {
+          throw new Error('toThrow passed but was expected to fail.');
+        }
+        if (error.message !== 'Expected function to throw') {
+          throw new Error('Unexpected message: ' + error.message);
+        }
+        if (error.actual !== null) {
+          throw new Error('error.actual should be null.');
+        }
+        if (error.expected !== 'y') {
+          throw new Error('error.expected should be "y".');
+        }
+      });
+
+      it('should fail if the error message does not match the expected string.', function() {
+        var fn = function() {
+          throw new Error('x');
+        };
+        var error = null;
+        try {
+          expect(fn).toThrow('y');
+        } catch (e) {
+          error = e;
+        }
+        if (!error) {
+          throw new Error('toThrow passed but was expected to fail.');
+        }
+        if (
+          error.message !==
+          'Expected function to throw an error with a message that match the expected string'
+        ) {
+          throw new Error('Unexpected message: ' + error.message);
+        }
+        if (error.actual !== 'x') {
+          throw new Error(
+            'error.actual should be the message from the error that the function throw.'
+          );
+        }
+        if (error.expected !== 'y') {
+          throw new Error('error.expected should be "y".');
+        }
+      });
+
+      it('should fail if the error message does not match the expected regexp.', function() {
+        var fn = function() {
+          throw new Error('x');
+        };
+        var error = null;
+        try {
+          expect(fn).toThrow(/error-id:\d+/i);
+        } catch (e) {
+          error = e;
+        }
+        if (!error) {
+          throw new Error('toThrow passed but was expected to fail.');
+        }
+        if (
+          error.message !==
+          'Expected function to throw an error with a message that match the expected regexp pattern'
+        ) {
+          throw new Error('Unexpected message: ' + error.message);
+        }
+        if (error.actual !== 'x') {
+          throw new Error(
+            'error.actual should be the message from the error that the function throw.'
+          );
+        }
+        if (error.expected !== '/error-id:\\d+/i') {
+          throw new Error(
+            'error.expected should be a stringified version of the regexp.'
+          );
+        }
+      });
+
+      it('should fail if the the value passed to expect() is not a function.', function() {
+        var error = null;
+        try {
+          expect('x').toThrow();
+        } catch (e) {
+          error = e;
+        }
+        if (!error) {
+          throw new Error('toThrow passed but was expected to fail.');
+        }
+        if (
+          error.message !==
+          'The value passed to expect() must be a function when toThrow is used.'
+        ) {
+          throw new Error('Unexpected message: ' + error.message);
+        }
+        if (error.actual !== 'string') {
+          throw new Error(
+            'error.actual should be the type of the actual value.'
+          );
+        }
+        if (error.expected !== 'function') {
+          throw new Error('error.expected should be "function".');
+        }
+      });
+
+      it('should fail if the the function throws but is expected not to throw.', function() {
+        var error = null;
+        try {
+          expect(function() {
+            throw new Error('x');
+          }).not.toThrow();
+        } catch (e) {
+          error = e;
+        }
+        if (!error) {
+          throw new Error('toThrow passed but was expected to fail.');
+        }
+        if (
+          /Expected .+ not to throw/.test(error.message) === false
+        ) {
+          throw new Error('Unexpected message: ' + error.message);
+        }
+      });
+
+      it('should pass if the function does not throw and we expected it not to.', function() {
+        expect(function() {
+          return 'x';
+        }).not.toThrow();
+      });
+
+      it('should pass if the function throws and we no expected value is used.', function() {
+        expect(function() {
+          throw new Error('x');
+        }).toThrow();
+      });
+
+      it('should pass if the error message match the expected string.', function() {
+        expect(function() {
+          throw new Error('x');
+        }).toThrow('x');
+      });
+
+      it('should pass if the error message match the expected regexp pattern.', function() {
+        expect(function() {
+          throw new Error('x');
+        }).toThrow(/^x$/);
+      });
+    });
+
     describe('toHaveShape', function() {
       it('should known basic shapes', function(done) {
         try {
