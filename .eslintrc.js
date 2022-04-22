@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
-  extends: ["correct/es5"]
+  extends: ['correct/es5']
 };
